@@ -12,6 +12,9 @@
 \author{James Wright}
 % \date{2019-01-21}
 
+%------------ MACROS ----------------
+\newcommand{\etot}{e_{tot}}
+
 \begin{document}
 \maketitle
 
@@ -36,4 +39,24 @@
         \left[\phi u_i \right]_{,j} = \frac{\partial \phi u_i}{\partial x_j}
     \end{equation}
 
+\section{Fundamental Fluid Equations}
+Compressible Navier-Stokes equations:
+
+    \subsection{Traditional Form}
+    \paragraph{Continuity}
+        \begin{equation}\label{eq:fund_continuity}
+            \rho_{,t} + \left[\rho u_j \right]_{,j} = 0
+        \end{equation}
+
+    \paragraph{Momentum}
+        \begin{equation}\label{eq:fund_momentum}
+            \left[\rho u_i \right]_{,t} + \left[\rho u_i u_j \right]_{,j} + p_{,i} = \tau_{ij,j} + b_i
+        \end{equation}
+        
+    \paragraph{Energy}
+        \begin{equation}\label{eq:fund_energy}
+            \left[\rho \etot \right]_{,t} + 
+            \left[\rho \etot u_j \right]_{,j} + \left[\rho u_j \right]_{,j} 
+            = \left[\tau_{ij} u_j \right]_{,j} + b_i u_j + r + q_{i,i}
+        \end{equation}
 \end{document}
