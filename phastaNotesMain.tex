@@ -7,6 +7,7 @@
 \usepackage{amsmath} % because using math and \text command in math mode
 \usepackage[numbers]{natbib}
 \usepackage{cancel} % for doing a diagonal slash cancel
+\usepackage[mathscr]{euscript} % for Fancy curly F
 
 \title{Notes on the Fundamental Equations of PHASTA}
 \author{James Wright}
@@ -14,6 +15,12 @@
 
 %------------ MACROS ----------------
 \newcommand{\etot}{e_{tot}}
+\renewcommand{\vec}[1]{\bm{#1}}
+\newcommand{\U}{\vec{U}}
+\newcommand{\Y}{\vec{Y}}
+\newcommand{\F}{\vec{F}}
+\newcommand{\0}{\vec{0}}
+\newcommand{\src}{\vec{\mathscr{F}}}
 
 \begin{document}
 \maketitle
@@ -59,4 +66,81 @@ Compressible Navier-Stokes equations:
             \left[\rho \etot u_j \right]_{,j} + \left[\rho u_j \right]_{,j} 
             = \left[\tau_{ij} u_j \right]_{,j} + b_i u_j + r + q_{i,i}
         \end{equation}
+    
+    \subsection{Conservative Vectorized Form}
+
+    \begin{equation}
+        \U \equiv
+        \begin{Bmatrix}
+            \rho \\
+            \rho u_1 \\
+            \rho u_2 \\
+            \rho u_3 \\
+            \rho \etot
+        \end{Bmatrix}
+        =
+        \begin{Bmatrix}
+            \rho \\
+            \rho u_j \\
+            \rho \etot
+        \end{Bmatrix}
+    \end{equation}
+
+    Flux Vector:
+
+    \begin{equation}
+        \begin{split}
+        \F_i & = 
+        \underbrace{
+        \begin{Bmatrix}
+            \rho u_i \\
+            \rho u_i u_j \\
+            \rho u_i \etot
+        \end{Bmatrix}
+        + \begin{Bmatrix}
+            0 \\
+            p \delta_{ij}\\
+            u_i p
+        \end{Bmatrix} }_{\text{Advective Flux}}
+        - \underbrace{ \begin{Bmatrix}
+            0 \\
+            \tau_{ij}\\
+            \tau_{ij} u_j 
+        \end{Bmatrix}
+        + \begin{Bmatrix}
+            0 \\
+            \0 \\
+            \tau_{ij} u_j 
+        \end{Bmatrix} }_{\text{Diffusive Flux}} \\
+        & = \F_i^{\text{adv}} + \F_i^{\text{dif}}
+        \end{split}
+    \end{equation}
+
+    Also:
+    \begin{equation}
+        \F_i^{adv}  = 
+        u_i \U
+        + \begin{Bmatrix}
+            0 \\
+            p \delta_{ij}\\
+            u_i p
+        \end{Bmatrix} 
+    \end{equation}
+
+    Source Vector:
+
+    \begin{equation}
+        \src = 
+        \begin{Bmatrix}
+            0 \\
+            b_j \\
+            b_j u_j + r
+        \end{Bmatrix}
+    \end{equation}
+
+    These terms combine together to form:
+    \begin{equation}
+        \U_{,t} + \F_{i,i} = \src
+    \end{equation}
+
 \end{document}
