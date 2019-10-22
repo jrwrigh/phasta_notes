@@ -9,6 +9,7 @@
 \usepackage[numbers]{natbib}
 \usepackage{cancel} % for doing a diagonal slash cancel
 \usepackage[mathscr]{euscript} % for Fancy curly F
+\usepackage{commath} % for \od, \pd
 
 \title{ASEN 5331 - HW3}
 \author{James Wright}
@@ -17,35 +18,109 @@
 %------------ MACROS ----------------
 \newcommand{\etot}{e_{tot}}
 \renewcommand{\vec}[1]{\bm{#1}}
+\newcommand{\ttt}[1]{\texttt{#1}}
 \newcommand{\U}{\vec{U}}
 \newcommand{\Y}{\vec{Y}}
 \newcommand{\F}{\vec{F}}
+\newcommand{\G}{\vec{G}}
 \newcommand{\0}{\vec{0}}
 \newcommand{\src}{\vec{\mathscr{F}}}
 
 \begin{document}
 \maketitle
 
-Using the code that is posted on the web page, associate the following concepts to both your notes and to the code.  By associate, I mean a one- to- one correspondence 
+Using the code that is posted on the web page, associate the following concepts to both your notes and to the code. By associate, I mean a one-to-one correspondence 
 between the variables in the notes and the variables in the code (complete with the range of their indices when they are arrays). Also, identify the routines where each 
 of these variables get updated and thereby carry out the algorithms we have described in the notes (again mapping the algorithms from the notes to routines that carry them out)
 
 
 \section{Gradient of shape function in the parent domain}
 
+    \begin{equation}
+        N_{a,\xi_l} (\vec{\xi}^k)
+    \end{equation}
+
+
+    Where \texttt{nsd} is number of spacial dimensions (ie. 3 for 3D, 2 for 2D)
+    
+    \texttt{npro} is the number of elements processed in a single call of e3.
+
+    \texttt{nflow} is the number of flow variables (usually 5)
+
+    Represented by \texttt{shgl (nsd,nen,nQpt)} (mentioned \texttt{common/shpt10t.f}). 
+    It appears that the \texttt{shgl} is defined in either \texttt{common/{shp10t.f,shp4t.f}}. Note this never gets called, but all other references use shgl as an input
+
+    Represented by \texttt{shgl (npro,nsd,nshape)} (mentioned \texttt{common/e3qvar.f})
+
+    Represented by \texttt{shgl (nsd,nshl,ngauss)} (mentioned \texttt{common/e3.f})
+    nsd = l, nshl = a, ngauss=k
+
 \section{Gradient of shape function in real domain}
 
-\section{Metric tensor that maps 1) to 2).}
+    \begin{equation}
+        N_{a,i} = \pd{N_a}{x_i}
+    \end{equation}
+
+    Possibly \texttt{shg(npro,nshl,nsd)}  is computed in \texttt{compressible/e3metric.f\#64}
+
+    Note that \ttt{compressible/e3qvar.f} defines \texttt{shg(npro,nshape,nsd)} but \ttt{compressible/e3ivar.f} defines \texttt{shg(npro,nshl,nsd)} but 
+
+\section{Metric tensor that maps \S1 to \S2}
+
+\begin{equation}
+    \vec{\xi_{j,i}}
+\end{equation}
+
+for 
+\begin{equation}
+    N_{a,i} = N_{a,\xi_j}\vec{\xi_{j,i}}
+\end{equation}
+
+Written as \texttt{dxidx(npro,nsd,nsd)} in \texttt{common/e3metric.f}. The index would then be a, j, i.
 
 \section{Global Residual}
+\begin{equation}
+    \vec{G}_A = \mathbb{A} \vec{G}^e_a
+\end{equation}
+
+Stored as \ttt{res(nshg,nflow)} which is assembled by the subroutine \ttt{common/local.f} which is called from \ttt{compressible/asigmr.f\#84}.
+
+The \ttt{local} subroutine just performs the \(\mathbb{A}\) operator.
+
+\ttt{nflow} is the number of flow variables
 
 \section{Element Level Residual}
 
+    \begin{equation}
+        \vec{G}^e_a
+    \end{equation}
+
+    Defined as \texttt{rl(npro,nshl,nflow)} in \texttt{common/e3.f} 
+
+    It is a collection of 5x1 vectors, one for each \ttt{a} and \ttt{e}, where \ttt{e=npro} and \ttt{a=nshl}
+
 \section{Element Level tangent matrix}
 
+    \begin{equation}
+        \od{\G^e_a}{\Y_b}
+    \end{equation}
+    Appears to be stored as \ttt{EGmass(npro,nedof,nedof)} in \ttt{compressible/e3conv.f\#314} where \ttt{e = npro} and \ttt{\{a,b\} = nedof}.
 \section{The gradient of the solution vector}
 
+    \begin{equation}
+        \Y_{,i}
+    \end{equation}
+
+    Appears to be named as \ttt{g[1..3]yi(npro,nflow)} and is calculated in \ttt{compressible/e3ivar.f\#243}.
+
+
 \section{Jacobian of the map from real domain to parent domain}
+
+    \begin{equation}
+        \pd{x}{\xi}
+    \end{equation}
+
+    Appears to be \ttt{dxdxi(npro,nsd,nsd)} in \ttt{common/e3metric.f\#20}
 
 \section{The advective/convective flux}
 
