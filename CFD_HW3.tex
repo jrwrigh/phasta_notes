@@ -10,6 +10,7 @@
 \usepackage{cancel} % for doing a diagonal slash cancel
 \usepackage[mathscr]{euscript} % for Fancy curly F
 \usepackage{commath} % for \od, \pd
+\usepackage{url} % for \path{}
 
 \title{ASEN 5331 - HW3}
 \author{James Wright}
@@ -48,12 +49,12 @@ of these variables get updated and thereby carry out the algorithms we have desc
 
     \texttt{nflow} is the number of flow variables (usually 5)
 
-    Represented by \texttt{shgl (nsd,nen,nQpt)} (mentioned \texttt{common/shpt10t.f}). 
-    It appears that the \texttt{shgl} is defined in either \texttt{common/{shp10t.f,shp4t.f}}. Note this never gets called, but all other references use shgl as an input
+    Represented by \texttt{shgl (nsd,nen,nQpt)} (mentioned \path{common/shpt10t.f}). 
+    It appears that the \texttt{shgl} is defined in either \path{common/{shp10t.f,shp4t.f}}. Note this never gets called, but all other references use shgl as an input
 
-    Represented by \texttt{shgl (npro,nsd,nshape)} (mentioned \texttt{common/e3qvar.f})
+    Represented by \texttt{shgl (npro,nsd,nshape)} (mentioned \path{common/e3qvar.f})
 
-    Represented by \texttt{shgl (nsd,nshl,ngauss)} (mentioned \texttt{common/e3.f})
+    Represented by \texttt{shgl (nsd,nshl,ngauss)} (mentioned \path{common/e3.f})
     nsd = l, nshl = a, ngauss=k
 
 \section{Gradient of shape function in real domain}
@@ -62,9 +63,9 @@ of these variables get updated and thereby carry out the algorithms we have desc
         N_{a,i} = \pd{N_a}{x_i}
     \end{equation}
 
-    Possibly \texttt{shg(npro,nshl,nsd)}  is computed in \texttt{compressible/e3metric.f\#64}
+    Possibly \texttt{shg(npro,nshl,nsd)}  is computed in \path{compressible/e3metric.f#64}
 
-    Note that \ttt{compressible/e3qvar.f} defines \texttt{shg(npro,nshape,nsd)} but \ttt{compressible/e3ivar.f} defines \texttt{shg(npro,nshl,nsd)} but 
+    Note that \path{compressible/e3qvar.f} defines \texttt{shg(npro,nshape,nsd)} but \path{compressible/e3ivar.f} defines \texttt{shg(npro,nshl,nsd)} but 
 
 \section{Metric tensor that maps \S1 to \S2}
 
@@ -77,14 +78,14 @@ for
     N_{a,i} = N_{a,\xi_j}\vec{\xi_{j,i}}
 \end{equation}
 
-Written as \texttt{dxidx(npro,nsd,nsd)} in \texttt{common/e3metric.f}. The index would then be a, j, i.
+Written as \texttt{dxidx(npro,nsd,nsd)} in \path{common/e3metric.f}. The index would then be a, j, i.
 
 \section{Global Residual}
 \begin{equation}
     \vec{G}_A = \mathbb{A} \vec{G}^e_a
 \end{equation}
 
-Stored as \ttt{res(nshg,nflow)} which is assembled by the subroutine \ttt{common/local.f} which is called from \ttt{compressible/asigmr.f\#84}.
+Stored as \ttt{res(nshg,nflow)} which is assembled by the subroutine \path{common/local.f} which is called from \path{compressible/asigmr.f#84}.
 
 The \ttt{local} subroutine just performs the \(\mathbb{A}\) operator.
 
@@ -96,7 +97,7 @@ The \ttt{local} subroutine just performs the \(\mathbb{A}\) operator.
         \vec{G}^e_a
     \end{equation}
 
-    Defined as \texttt{rl(npro,nshl,nflow)} in \texttt{common/e3.f} 
+    Defined as \texttt{rl(npro,nshl,nflow)} in \path{common/e3.f} 
 
     It is a collection of 5x1 vectors, one for each \ttt{a} and \ttt{e}, where \ttt{e=npro} and \ttt{a=nshl}
 
@@ -105,9 +106,9 @@ The \ttt{local} subroutine just performs the \(\mathbb{A}\) operator.
     \begin{equation}
         \od{\G^e_a}{\Y_b}
     \end{equation}
-    Appears to be stored as \ttt{EGmass(npro,nedof,nedof)} in \ttt{compressible/e3conv.f\#314} where \ttt{e = npro} and \ttt{\{a,b\} = nedof}.
+    Appears to be stored as \ttt{EGmass(npro,nedof,nedof)} in \path{compressible/e3conv.f#314} where \ttt{e = npro} and \ttt{\{a,b\} = nedof}.
 
-    This is built by inputting the jacobian of the advective flux (\(\A_i = \F_{i,\vec{Y}}\) written in code as \ttt{Ai}) which is calculated in \ttt{compressible/e3mtrx.f}, multiplying this by the real space gradient of the shape function in lines \ttt{compressible/e3conv.f\#201-306} to make the \ttt{AiNbi} tensor. \ttt{AiNbi} is then multiplied by \ttt{shape}
+    This is built by inputting the jacobian of the advective flux (\(\A_i = \F_{i,\vec{Y}}\) written in code as \ttt{Ai}) which is calculated in \path{compressible/e3mtrx.f}, multiplying this by the real space gradient of the shape function in lines \path{compressible/e3conv.f#201-306} to make the \ttt{AiNbi} tensor. \ttt{AiNbi} is then multiplied by \ttt{shape}
 
 \section{The gradient of the solution vector}
 
@@ -115,7 +116,7 @@ The \ttt{local} subroutine just performs the \(\mathbb{A}\) operator.
         \Y_{,i}
     \end{equation}
 
-    Appears to be named as \ttt{g[1..3]yi(npro,nflow)} and is calculated in \ttt{compressible/e3ivar.f\#243}.
+    Appears to be named as \ttt{g[1..3]yi(npro,nflow)} and is calculated in \path{compressible/e3ivar.f#243}.
 
     It is calculated by the sum of the products of the real space gradient shape function \ttt{shg} and the element primitive variables \ttt{yl}.
 
@@ -125,7 +126,7 @@ The \ttt{local} subroutine just performs the \(\mathbb{A}\) operator.
         \pd{x}{\xi}
     \end{equation}
 
-    Appears to be \ttt{dxdxi(npro,nsd,nsd)} in \ttt{common/e3metric.f\#20} 
+    Appears to be \ttt{dxdxi(npro,nsd,nsd)} in \path{common/e3metric.f#20} 
 
     It is calculated by the multiplying the nodal coordinates \ttt{xl} by the gradient of the local shape function \ttt{shgl}.
 
@@ -135,7 +136,7 @@ The \ttt{local} subroutine just performs the \(\mathbb{A}\) operator.
         \F_i^{\text{adv}}
     \end{equation}
 
-    Defined as \ttt{ri} in \ttt{compressible/e3conv.f\#74}. It is calculated directly using the definition of the advective flux
+    Defined as \ttt{ri} in \path{compressible/e3conv.f#74}. It is calculated directly using the definition of the advective flux
 
     \begin{equation}
         \F_i^{adv}  = 
@@ -147,7 +148,7 @@ The \ttt{local} subroutine just performs the \(\mathbb{A}\) operator.
         \end{Bmatrix} 
     \end{equation}
 
-    \ttt{ri} is formatted such that the \(\F_1^{\text{adv}}\) is \ttt{r1(:,1:5)}
+    \ttt{ri} is formatted such that the \(\F_1^{\text{adv}}\) is \ttt{ri(:,1:5)}
 
 \section{The Jacobian of the Advective/Convective Flux}
     \begin{equation}
@@ -155,5 +156,5 @@ The \ttt{local} subroutine just performs the \(\mathbb{A}\) operator.
     \end{equation}
 
 
-    Defined in \ttt{compressible/e3mtrx.f\#132} as \ttt{A[1..3]}, it is calculated in a similar direct way as \(\F_i^{\text{adv}}\), while additionally using \ttt{rYli} which is calculated in \ttt{compressible/e3conv.f\#100}. Note that \ttt{rYli} is mascaraded as \ttt{e2p, e3p, e4p, drdp,} and \ttt{drdT}.
+    Defined in \path{compressible/e3mtrx.f#132} as \ttt{A[1..3]}, it is calculated in a similar direct way as \(\F_i^{\text{adv}}\), while additionally using \ttt{rYli} which is calculated in \path{compressible/e3conv.f#100}. Note that \ttt{rYli} is mascaraded as \ttt{e2p, e3p, e4p, drdp,} and \ttt{drdT}.
 \end{document}
