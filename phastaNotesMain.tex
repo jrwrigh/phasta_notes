@@ -19,11 +19,18 @@
 \newcommand{\etot}{e_{tot}}
 \renewcommand{\vec}[1]{\bm{#1}}
 \newcommand{\U}{\vec{U}}
+\newcommand{\G}{\vec{G}}
 \newcommand{\Y}{\vec{Y}}
 \newcommand{\F}{\vec{F}}
 \newcommand{\W}{\vec{W}}
 \newcommand{\0}{\vec{0}}
 \newcommand{\x}{\vec{x}}
+\newcommand{\NAx}{N_A(\x)}
+\newcommand{\NBx}{N_B(\x)}
+\newcommand{\NAix}{N_{A,i}(\x)}
+\newcommand{\NBix}{N_{B,i}(\x)}
+\newcommand{\sumA}[1]{\sum_{A=1}^{#1}}
+\newcommand{\sumB}[1]{\sum_{B=1}^{#1}}
 \newcommand{\src}{\vec{\mathscr{F}}}
 
 \begin{document}
@@ -166,10 +173,10 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
 
     Next, perform integration by parts and Gauss's theorem on \(\F_{i,i}\):
     \begin{equation} \label{eq:weakUCNS_IBP}
-        \int_\Omega \left\{\W \cdot \U_{,t} - \W_{,i} \cdot \F_i - \W \cdot \src \right\} \dif \Omega 
-        + \int_\Gamma \W \cdot \F_i \cdot \hat n_i \dif\Gamma= 0
+        \int_\Omega \left\{\W \cdot \U_{,t} - \W_{,i} \cdot \F_i(\U, \U_{,i}) - \W \cdot \src(\U) \right\} \dif \Omega 
+        + \int_\Gamma \W \cdot \F_i(\U, \U_{,i}) \cdot \hat n_i \dif\Gamma= 0
     \end{equation}
-    where \(\Gamma\) is the boundary of the domain \(\Omega\) and \(\hat n_i\) is the normal unit vector of the boundary surface. \Cref{eq:weakUCNS_IBP} represents the \textbf{Weak UCNS in IBP Form}.
+    where \(\Gamma\) is the boundary of the domain \(\Omega\) and \(\hat n_i\) is the normal unit vector of the boundary surface. \Cref{eq:weakUCNS_IBP} represents the \textbf{Weak UCNS in IBP Form}. The fact that \(\F_i\) and \(\src\) are functions of \(\U\) and \(\U_{,i}\) is explicitly shown here.
 
     \subsection{Domain Discretization}
         Define nodes, points, and elements. 
@@ -181,9 +188,10 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
             \phi(\x) = \sum_{A=1}^{n_n} N_A(\x) \phi_A
         \end{equation}
 
-        where \(A\) is the index of each node and \(\phi_A\) is the value of \(\phi\) at each node \(A\). This decomposition can be extrapolated to our unknowns: \(\U\), \(\U_{,t}\), and \(\W\):
+        where \(A\) is the index of each node, \(\phi_A\) is the value of \(\phi\) at each node \(A\), and \(n_n\) is the number of nodes used to discretize \(\Omega\). Note that \(\phi\) on the LHS is continuos, but \(\phi_A\) are discrete scalar values for every \(A\). This decomposition can be extrapolated to our unknowns: \(\U\), \(\U_{,t}\), and \(\W\):
 
         \begin{subequations}
+            \label{eq:variableshapefuncdecomp}
            \begin{align}
                 \U(\x) &= \sum_{A=1}^{n_n} N_A(\x) \U_A \\
                 \U_{,t}(\x) &= \sum_{A=1}^{n_n} N_A(\x) \U_{A,t} \\
@@ -193,8 +201,31 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
 
         Since we are working in Galerkin, \(N_A(\x) = N_B(\x) \) for \(A=B\) (ie, at the same node). 
 
+        \subsubsection{Discretize UCNS}
+            Let's substitute the expressions in \cref{eq:variableshapefuncdecomp} into the weak UCNS form in \cref{eq:weakUCNS_IBP}.
 
+            \begin{multline}
+                \int_\Omega \Biggl\{ \sumB{n_n} \NBx \W_B \cdot \sumA{n_n} \NAx \U_{A,t} 
+                - \sumB{n_n} \NBix \W_B \F_i \biggl(\sumA{n_n} \NAx \U_A,\ \sumA{n_n} \NAix \U_A\biggr) \\
+                - \sumB{n_n} \W_B \src\biggl(\sumA{n_n} \NAx \U_A \biggr) \Biggr\} \dif \Omega \\
+                + \int_\Gamma \sumB{n_n} \W_B \cdot \F_i\biggl(\sumA{n_n} \NAx \U_A,\ \sumA{n_n} \NAix \U_A\biggr) \hat n_i \dif \Gamma = 0
+            \end{multline}
 
+            Note that \(\U_{,i} = [\sumA{n_n} \NAx \U_A]_{,i}\) , but since \(\U_A\) is not a function of \(\x\) (it is only dependent on \(A\)), the sum and \(\U_A\) can be taken out of the brakets, leaving \(\NAx\) to be derived: \(\U_{,i} = \sumA{n_n} \NAix \U_A\).
+
+            Since \(\W_B\) is a vector of constants, we can take it out of the integral, along with it's respective summation:
+            \begin{multline} \label{eq:shapefuncUCNS}
+                \sumB{n_n} \W_B  \Biggl\{\int_\Omega \biggl\{  \NBx  \cdot \sumA{n_n} \NAx \U_{A,t} 
+                -  \NBix  \F_i \biggl(\sumA{n_n} \NAx \U_A,\ \sumA{n_n} \NAix \U_A\biggr) \\
+                -   \src\biggl(\sumA{n_n} \NAx \U_A \biggr) \biggr\} \dif \Omega \\
+                + \int_\Gamma \F_i\biggl(\sumA{n_n} \NAx \U_A,\ \sumA{n_n} \NAix \U_A\biggr) \hat n_i \dif \Gamma \Biggr\} = 0
+            \end{multline}
+
+            \begin{equation}
+                \cref{eq:shapefuncUCNS} \Rightarrow \sumB{n_n} \W_B \cdot \G_B = 0
+            \end{equation}
+
+            If we assume that \(\W_B\) is arbitrary, then \(\G_B=0\).
 
 
 \end{document}
