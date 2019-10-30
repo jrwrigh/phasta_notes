@@ -1,0 +1,182 @@
+
+\documentclass[12pt, letterpaper, twoside]{article}
+\usepackage[margin=2.50cm]{geometry} % Makes the Margins not stupid
+\usepackage{bm} % for making bold equation variables
+\usepackage{graphicx} % for placing images
+\usepackage{float} % for making figure stay in place
+\usepackage{amssymb} % for \lessapprox symbol
+\usepackage{amsmath} % because using math and \text command in math mode
+\usepackage[numbers]{natbib}
+\usepackage{cancel} % for doing a diagonal slash cancel
+\usepackage[mathscr]{euscript} % for Fancy curly F
+\usepackage{commath} % for \od, \pd
+\usepackage{url} % for \path{}
+
+\title{ASEN 5331 - HW3}
+\author{James Wright}
+% \date{2019-01-21}
+
+%------------ MACROS ----------------
+\newcommand{\etot}{e_{tot}}
+\renewcommand{\vec}[1]{\bm{#1}}
+\newcommand{\ttt}[1]{\texttt{#1}}
+\newcommand{\U}{\vec{U}}
+\newcommand{\A}{\vec{A}}
+\newcommand{\Y}{\vec{Y}}
+\newcommand{\F}{\vec{F}}
+\newcommand{\G}{\vec{G}}
+\newcommand{\0}{\vec{0}}
+\newcommand{\src}{\vec{\mathscr{F}}}
+
+\begin{document}
+\maketitle
+
+Using the code that is posted on the web page, associate the following concepts to both your notes and to the code. By associate, I mean a one-to-one correspondence 
+between the variables in the notes and the variables in the code (complete with the range of their indices when they are arrays). Also, identify the routines where each 
+of these variables get updated and thereby carry out the algorithms we have described in the notes (again mapping the algorithms from the notes to routines that carry them out)
+
+\subsection{Meaning of \ttt{n...}}
+
+\begin{tabular} { |c|l|c|}
+    \hline
+    Term & Definition & Source/Relevant Reference \\
+    \hline
+    \ttt{nsd} & number of spacial dimensions & \path{common/common.h#343} \\
+    \ttt{nflow} & number of flow variables (ie. size of \(\Y\)) & ? \\
+    \ttt{nshape} & number of interior element shape functions & \path{common/common.h#444} \\
+    \ttt{ngauss} & number of interior element integration points & \path{common/common.h#447} \\
+    \ttt{npro} & number of elements processed in a single call of \ttt{e3.f} & Jansen lecture \\
+    \ttt{npro} & number of virtual processors for the current block & \path{common/common/h#586} \\
+    \ttt{nen} & maximum number of element nodes & \path{common/common.h#341} \\
+    \ttt{nQpt} & number of quadrature points per element & \path{common/shp4t.f#14} \\
+    \ttt{nshl} & number of shape functions per element & \path{common/genblkPosix.f#70} \\
+    \ttt{nshg} & global number of shape functions & \path{common/common.h#354} \\
+    \ttt{nenl} & number of element nodes for current block & \path{common/common.h#382} \\
+    \ttt{nedof} & total number of degrees of freedom & \path{common/e3.f#35,344} \\
+
+    \hline
+
+\end{tabular}
+
+\section{Gradient of shape function in the parent domain}
+
+    \begin{equation}
+        N_{a,\xi_l} (\vec{\xi}^k)
+    \end{equation}
+
+
+    Represented by \texttt{shgl (nsd,nen,nQpt)} in \path{common/shpt10t.f}. 
+    It appears that the \texttt{shgl} is defined in either \path{common/{shp10t.f,shp4t.f}}. Note this never gets called, but all other references use \ttt{shgl} as an input, so I can't find where else \ttt{shgl} would be defined.
+
+    Note also there are different definitions to the size of \ttt{shgl} in different functions:
+
+    \begin{tabular} {|l|l|}
+        \hline
+        \noindent
+        \ttt{shgl (nsd,nshl,ngauss)} & \path{common/e3.f} \\
+        \ttt{shgl (npro,nsd,nshape)} & \path{common/e3qvar.f} \\
+        \ttt{shgl (nsd, nen)} & \path{common/e3ivar.f} \\
+        \hline
+    \end{tabular}
+
+    Using the definition in \path{common/e3.f}, \ttt{nsd} = \(\ell\), \ttt{nshl} = \(a\), \ttt{ngauss}=\(k\)
+
+\section{Gradient of shape function in real domain}
+
+    \begin{equation}
+        N_{a,i} = \pd{N_a}{x_i}
+    \end{equation}
+
+    Possibly \texttt{shg(npro,nshl,nsd)}  is computed in \path{compressible/e3metric.f#64}
+
+    Note that \path{compressible/e3qvar.f} defines \texttt{shg(npro,nshape,nsd)} but \path{compressible/e3ivar.f} defines \texttt{shg(npro,nshl,nsd)} but 
+
+\section{Metric tensor that maps \S1 to \S2}
+
+\begin{equation}
+    \vec{\xi_{j,i}}
+\end{equation}
+
+for 
+\begin{equation}
+    N_{a,i} = N_{a,\xi_j}\vec{\xi_{j,i}}
+\end{equation}
+
+Written as \texttt{dxidx(npro,nsd,nsd)} in \path{common/e3metric.f}. The index would then be a, j, i.
+
+\section{Global Residual}
+\begin{equation}
+    \vec{G}_A = \mathbb{A} \vec{G}^e_a
+\end{equation}
+
+Stored as \ttt{res(nshg,nflow)} which is assembled by the subroutine \path{common/local.f} which is called from \path{compressible/asigmr.f#84}.
+
+The \ttt{local} subroutine just performs the \(\mathbb{A}\) operator.
+
+\section{Element Level Residual}
+
+    \begin{equation}
+        \vec{G}^e_a
+    \end{equation}
+
+    Defined as \texttt{rl(npro,nshl,nflow)} in \path{common/e3.f}. \path{e3.f} calls \path{e3wmlt.f}, where \ttt{rl} is actually computed in \path{compressible/e3wmlt.f#66}.
+
+    It is a collection of 5x1 vectors, one for each \ttt{a} and \ttt{e}, where \ttt{e=npro} and \ttt{a=nshl}
+
+\section{Element Level tangent matrix}
+
+    \begin{equation}
+        \od{\G^e_a}{\Y_b}
+    \end{equation}
+    Appears to be stored as \ttt{EGmass(npro,nedof,nedof)} in \path{compressible/e3conv.f#314} where \ttt{e = npro} and \ttt{\{a,b\} = nedof}.
+
+    This is built by inputting the jacobian of the advective flux (\(\A_i = \F_{i,\vec{Y}}\) written in code as \ttt{Ai}) which is calculated in \path{compressible/e3mtrx.f}, multiplying this by the real space gradient of the shape function in lines \path{compressible/e3conv.f#201-306} to make the \ttt{AiNbi} tensor. \ttt{AiNbi} is then multiplied by \ttt{shape}
+
+\section{The gradient of the solution vector}
+
+    \begin{equation}
+        \Y_{,i}
+    \end{equation}
+
+    Appears to be named as \ttt{g[1..3]yi(npro,nflow)} and is calculated in \path{compressible/e3ivar.f#243}.
+
+    It is calculated by the sum of the products of the real space gradient shape function \ttt{shg} and the element primitive variables \ttt{yl}.
+
+\section{Jacobian of the map from real domain to parent domain}
+
+    \begin{equation}
+        \pd{x}{\xi}
+    \end{equation}
+
+    Appears to be \ttt{dxdxi(npro,nsd,nsd)} in \path{common/e3metric.f#20} 
+
+    It is calculated by the multiplying the nodal coordinates \ttt{xl} by the gradient of the local shape function \ttt{shgl}.
+
+\section{The advective/convective flux}
+
+    \begin{equation}
+        \F_i^{\text{adv}}
+    \end{equation}
+
+    Defined as \ttt{ri (npro, nflow*(nsd+1))} in \path{compressible/e3conv.f#74}. It is calculated directly using the definition of the advective flux
+
+    \begin{equation}
+        \F_i^{adv}  = 
+        u_i \U
+        + \begin{Bmatrix}
+            0 \\
+            p \delta_{ij}\\
+            u_i p
+        \end{Bmatrix} 
+    \end{equation}
+
+    \ttt{ri} is formatted such that the \(\F_1^{\text{adv}}\) is \ttt{ri(:,1:5)}
+
+\section{The Jacobian of the Advective/Convective Flux}
+    \begin{equation}
+        \A_i = \F_{i,\vec{Y}}
+    \end{equation}
+
+
+    Defined in \path{compressible/e3mtrx.f#132} as \ttt{A[1..3] (npro,nflow,nflow)}, it is calculated in a similar direct way as \(\F_i^{\text{adv}}\), while additionally using \ttt{rYli} which is calculated in \path{compressible/e3conv.f#100}. Note that \ttt{rYli} is mascaraded as \ttt{e2p, e3p, e4p, drdp,} and \ttt{drdT} inside \path{compressible/e3mtrx.f}.
+\end{document}
