@@ -8,6 +8,8 @@
 \usepackage[numbers]{natbib}
 \usepackage{cancel} % for doing a diagonal slash cancel
 \usepackage[mathscr]{euscript} % for Fancy curly F
+\usepackage{cleveref} % for \cref
+\usepackage{commath} % for \od, \pd
 
 \title{Notes on the Fundamental Equations of PHASTA}
 \author{James Wright}
@@ -19,7 +21,9 @@
 \newcommand{\U}{\vec{U}}
 \newcommand{\Y}{\vec{Y}}
 \newcommand{\F}{\vec{F}}
+\newcommand{\W}{\vec{W}}
 \newcommand{\0}{\vec{0}}
+\newcommand{\x}{\vec{x}}
 \newcommand{\src}{\vec{\mathscr{F}}}
 
 \begin{document}
@@ -47,7 +51,7 @@
     \end{equation}
 
 \section{Fundamental Fluid Equations}
-Compressible Navier-Stokes equations:
+Unsteady Compressible Navier-Stokes (UCNS) equations:
 
     \subsection{Traditional Form}
     \paragraph{Continuity}
@@ -139,8 +143,58 @@ Compressible Navier-Stokes equations:
     \end{equation}
 
     These terms combine together to form:
-    \begin{equation}
+    \begin{equation} \label{eq:vecNS}
         \U_{,t} + \F_{i,i} = \src
     \end{equation}
+
+\section{Finite Element Discretization}
+
+    Before discritizing, we must first setup the UCNS equations. First, rearrange \cref{eq:vecNS} into a residual form:
+    \begin{equation}
+        \U_{,t} + \F_{i,i} - \src = \0
+    \end{equation}
+
+    Next multiply by weight/test functions, \(\W\). Note that \(\0\) is now just a scalar 0.
+    \begin{equation}
+        \W \cdot ( \U_{,t} + \F_{i,i} - \src )= 0
+    \end{equation}
+
+    To create the \textbf{Weak Form} of the NS equations, integrate over the domain \(\Omega\):
+    \begin{equation}
+        \int_\Omega \W \cdot (\U_{,t} + \F_{i,i} - \src) \dif \Omega= 0
+    \end{equation}
+
+    Next, perform integration by parts and Gauss's theorem on \(\F_{i,i}\):
+    \begin{equation} \label{eq:weakUCNS_IBP}
+        \int_\Omega \left\{\W \cdot \U_{,t} - \W_{,i} \cdot \F_i - \W \cdot \src \right\} \dif \Omega 
+        + \int_\Gamma \W \cdot \F_i \cdot \hat n_i \dif\Gamma= 0
+    \end{equation}
+    where \(\Gamma\) is the boundary of the domain \(\Omega\) and \(\hat n_i\) is the normal unit vector of the boundary surface. \Cref{eq:weakUCNS_IBP} represents the \textbf{Weak UCNS in IBP Form}.
+
+    \subsection{Domain Discretization}
+        Define nodes, points, and elements. 
+
+        \subsubsection{Shape Function Decomposition}
+        Define a set of functions \(N\) that are a basis for the weight functions. In the case of the \textbf{Galerkin Form}, the basis/shape functions \(N\) are the same for the weight function and the solution function. We can decompose some constant \(\phi\) into
+
+        \begin{equation}
+            \phi(\x) = \sum_{A=1}^{n_n} N_A(\x) \phi_A
+        \end{equation}
+
+        where \(A\) is the index of each node and \(\phi_A\) is the value of \(\phi\) at each node \(A\). This decomposition can be extrapolated to our unknowns: \(\U\), \(\U_{,t}\), and \(\W\):
+
+        \begin{subequations}
+           \begin{align}
+                \U(\x) &= \sum_{A=1}^{n_n} N_A(\x) \U_A \\
+                \U_{,t}(\x) &= \sum_{A=1}^{n_n} N_A(\x) \U_{A,t} \\
+                \W(\x) &= \sum_{B=1}^{n_n} N_B(\x) \W_B 
+           \end{align} 
+        \end{subequations}
+
+        Since we are working in Galerkin, \(N_A(\x) = N_B(\x) \) for \(A=B\) (ie, at the same node). 
+
+
+
+
 
 \end{document}
