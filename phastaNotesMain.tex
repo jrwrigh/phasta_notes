@@ -10,6 +10,7 @@
 \usepackage[mathscr]{euscript} % for Fancy curly F
 \usepackage{cleveref} % for \cref
 \usepackage{commath} % for \od, \pd
+\usepackage{outlines} % for outlines env
 
 \title{Notes on the Fundamental Equations of PHASTA}
 \author{James Wright}
@@ -23,14 +24,19 @@
 \newcommand{\Y}{\vec{Y}}
 \newcommand{\F}{\vec{F}}
 \newcommand{\W}{\vec{W}}
-\newcommand{\0}{\vec{0}}
 \newcommand{\x}{\vec{x}}
 \newcommand{\NAx}{N_A(\x)}
 \newcommand{\NBx}{N_B(\x)}
 \newcommand{\NAix}{N_{A,i}(\x)}
 \newcommand{\NBix}{N_{B,i}(\x)}
+\newcommand{\Neax}{N^e_a(\x)}
+\newcommand{\Nebx}{N^e_b(\x)}
+\newcommand{\Neaix}{N^e_{a,i}(\x)}
+\newcommand{\Nebix}{N^e_{b,i}(\x)}
 \newcommand{\sumA}[1]{\sum_{A=1}^{#1}}
 \newcommand{\sumB}[1]{\sum_{B=1}^{#1}}
+\newcommand{\suma}[1]{\sum_{a=1}^{#1}}
+\newcommand{\sumb}[1]{\sum_{b=1}^{#1}}
 \newcommand{\src}{\vec{\mathscr{F}}}
 
 \begin{document}
@@ -120,7 +126,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
         \end{Bmatrix}
         + \begin{Bmatrix}
             0 \\
-            \0 \\
+            \vec{0} \\
             q_{i,i}
         \end{Bmatrix} }_{\text{Diffusive Flux}} \\
         & = \F_i^{\text{adv}} + \F_i^{\text{dif}}
@@ -158,10 +164,10 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
 
     Before discritizing, we must first setup the UCNS equations. First, rearrange \cref{eq:vecNS} into a residual form:
     \begin{equation}
-        \U_{,t} + \F_{i,i} - \src = \0
+        \U_{,t} + \F_{i,i} - \src = \vec{0}
     \end{equation}
 
-    Next multiply by weight/test functions, \(\W\). Note that \(\0\) is now just a scalar 0.
+    Next multiply by weight/test functions, \(\W\). Note that \(\vec{0}\) is now just a scalar 0.
     \begin{equation}
         \W \cdot ( \U_{,t} + \F_{i,i} - \src )= 0
     \end{equation}
@@ -226,6 +232,25 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
             \end{equation}
 
             If we assume that \(\W_B\) is arbitrary, then \(\G_B=0\).
+
+        \subsubsection{Local/Element level Formulation}
+            For brevity, we will abreviate the inputs of \(\F_i\) and \(\src\) to their continous inputs: \(\F_i(\U, \U_i)\) and \(\src(\U)\).
+
+            \begin{multline} 
+                \G_b^e = \int_{\Omega^e} \Biggl\{ \Nebx \biggl[ \suma{n_{en}} \Neax \U_{a,t}^e - \src(\U) \biggr] - \Nebix \F_i(\U_a^e, \U_{a,i}^e) \Biggr\} \dif \Omega^e \\
+                + \int_{\Gamma^e} \Nebx \F_i(\U_a^e, \U_{a,i}^e) \hat n_i \dif \Gamma^e
+            \end{multline}
+
+            Notes:
+            \begin{outline}[enumerate]
+                \1 \(n_{en}\) is the number of nodes per element
+                \1 \(^e\) is the element ID number (\(e = \{1 ... n_n\}\)), 
+                \1 \(_a\) is the node ID number relative to the current element, \(a = \{1 ... n_{en}\}\)
+                \1 \(\U = \suma{n_{en}} \Neax \U_a^e\) , \(\U_i = \suma{n_{en}} \Neaix \U_a^e\)
+                \1 \(\Gamma^e \subset \Gamma \). In words, \(\Gamma^e\) is not the boundary of \(\Omega^e\)
+                
+            \end{outline}
+
 
 
 \end{document}
