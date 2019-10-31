@@ -165,7 +165,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
 
 \section{Finite Element Discretization}
 
-    Before discritizing, we must first setup the UCNS equations. First, rearrange \cref{eq:vecNS} into a residual form:
+    Before discretizing, we must first setup the UCNS equations. First, rearrange \cref{eq:vecNS} into a residual form:
     \begin{equation}
         \U_{,t} + \F_{i,i} - \src = \vec{0}
     \end{equation}
@@ -197,7 +197,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
             \phi(\x) = \sum_{A=1}^{n_n} N_A(\x) \phi_A
         \end{equation}
 
-        where \(A\) is the index of each node, \(\phi_A\) is the value of \(\phi\) at each node \(A\), and \(n_n\) is the number of nodes used to discretize \(\Omega\). Note that \(\phi\) on the LHS is continuos, but \(\phi_A\) are discrete scalar values for every \(A\). This decomposition can be extrapolated to our unknowns: \(\U\), \(\U_{,t}\), and \(\W\):
+        where \(A\) is the index of each node, \(\phi_A\) is the value of \(\phi\) at each node \(A\), and \(n_n\) is the number of nodes used to discretize \(\Omega\). Note that \(\phi\) on the LHS is continuous, but \(\phi_A\) are discrete scalar values for every \(A\). This decomposition can be extrapolated to our unknowns: \(\U\), \(\U_{,t}\), and \(\W\):
 
         \begin{subequations}
             \label{eq:variableshapefuncdecomp}
@@ -220,7 +220,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
                 + \int_\Gamma \sumB{n_n} \W_B \cdot \F_i\biggl(\sumA{n_n} \NAx \U_A,\ \sumA{n_n} \NAix \U_A\biggr) \hat n_i \dif \Gamma = 0
             \end{multline}
 
-            Note that \(\U_{,i} = [\sumA{n_n} \NAx \U_A]_{,i}\) , but since \(\U_A\) is not a function of \(\x\) (it is only dependent on \(A\)), the sum and \(\U_A\) can be taken out of the brakets, leaving \(\NAx\) to be derived: \(\U_{,i} = \sumA{n_n} \NAix \U_A\).
+            Note that \(\U_{,i} = [\sumA{n_n} \NAx \U_A]_{,i}\) , but since \(\U_A\) is not a function of \(\x\) (it is only dependent on \(A\)), the sum and \(\U_A\) can be taken out of the brackets, leaving \(\NAx\) to be derived: \(\U_{,i} = \sumA{n_n} \NAix \U_A\).
 
             Since \(\W_B\) is a vector of constants, we can take it out of the integral, along with it's respective summation:
             \begin{multline} \label{eq:shapefuncUCNS}
@@ -237,11 +237,11 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
             If we assume that \(\W_B\) is arbitrary, then \(\G_B=0\).
 
         \subsubsection{Local/Element level Formulation}
-            For brevity, we will abbreviate the inputs of \(\F_i\) and \(\src\) to their continuos inputs: \(\F_i(\U, \U_i)\) and \(\src(\U)\).
+            For brevity, we will abbreviate the inputs of \(\F_i\) and \(\src\) to their continuous inputs: \(\F_i(\U, \U_i)\) and \(\src(\U)\).
 
             \begin{multline} 
-                \G_b^e = \int_{\Omega^e} \Biggl\{ \Nebx \biggl[ \suma{n_{en}} \Neax \U_{a,t}^e - \src(\U) \biggr] - \Nebix \F_i(\U_a^e, \U_{a,i}^e) \Biggr\} \dif \Omega^e \\
-                + \int_{\Gamma^e} \Nebx \F_i(\U_a^e, \U_{a,i}^e) \hat n_i \dif \Gamma^e
+                \G_b^e = \int_{\Omega^e} \Biggl\{ \Nebx \biggl[ \suma{n_{en}} \Neax \U_{a,t}^e - \src(\U) \biggr] - \Nebix \F_i(\U, \U_{,i}) \Biggr\} \dif \Omega^e \\
+                + \int_{\Gamma^e} \Nebx \F_i(\U, \U_{,i}) \hat n_i \dif \Gamma^e
             \end{multline}
 
             Notes:
