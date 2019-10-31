@@ -265,7 +265,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
     \end{equation}
       and LHS is the mass matrix 
     \begin{equation}
-      \sum \od{\hat \G_B}{\Y}
+      \sum \pd{\hat \G_B}{\Y}
     \end{equation}
     \subsection{Term Definition}
 \begin{tabular} { |c|l|c|}
@@ -273,6 +273,8 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
     Term & Definition \\
     \hline
     \ttt{rlYi} & \(\A_i \Y_{,i}\)  \\
+    \ttt{ri} & building of residual RHS (I think)  \\
+    \ttt{EGmass} & mass matrix, \(\pd{\G}{\Y}\)  \\
     \hline
 
 \end{tabular}
