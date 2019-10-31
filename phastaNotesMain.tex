@@ -46,30 +46,31 @@
 \maketitle
 
 \section{Shorthand}
-    \begin{equation}
+    \begin{equation*}
         \phi_{,t} = \frac{\partial \phi}{\partial t}
-    \end{equation}
+    \end{equation*}
 
-    \begin{equation}
+    \begin{equation*}
         \phi_{,i} = \frac{\partial \phi}{\partial x_i}
-    \end{equation}
+    \end{equation*}
 
-    \begin{equation}
+    \begin{equation*}
         u_{i,t} = \frac{\partial u_i}{\partial t}
-    \end{equation}
+    \end{equation*}
 
-    \begin{equation}
+    \begin{equation*}
         u_{i,j} = \frac{\partial u_i}{\partial x_j}
-    \end{equation}
+    \end{equation*}
 
-    \begin{equation}
+    \begin{equation*}
         \left[\phi u_i \right]_{,j} = \frac{\partial \phi u_i}{\partial x_j}
-    \end{equation}
+    \end{equation*}
 
-\section{Fundamental Fluid Equations}
+\section{Theory}
+\subsection{Fundamental Fluid Equations}
 Unsteady Compressible Navier-Stokes (UCNS) equations:
 
-    \subsection{Traditional Form}
+    \subsubsection{Traditional (Strong) Form}
     \paragraph{Continuity}
         \begin{equation}\label{eq:fund_continuity}
             \rho_{,t} + \left[\rho u_j \right]_{,j} = 0
@@ -87,7 +88,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
             = \left[\tau_{ij} u_j \right]_{,j} + b_i u_j + r + q_{i,i}
         \end{equation}
     
-    \subsection{Conservative Vectorized Form}
+    \subsubsection{Conservative Vectorized Form}
 
     \begin{equation}
         \U \equiv
@@ -163,7 +164,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
         \U_{,t} + \F_{i,i} = \src
     \end{equation}
 
-\section{Finite Element Discretization}
+\subsection{Finite Element Discretization}
 
     Before discretizing, we must first setup the UCNS equations. First, rearrange \cref{eq:vecNS} into a residual form:
     \begin{equation}
@@ -187,10 +188,10 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
     \end{equation}
     where \(\Gamma\) is the boundary of the domain \(\Omega\) and \(\hat n_i\) is the normal unit vector of the boundary surface. \Cref{eq:weakUCNS_IBP} represents the \textbf{Weak UCNS in IBP Form}. The fact that \(\F_i\) and \(\src\) are functions of \(\U\) and \(\U_{,i}\) is explicitly shown here.
 
-    \subsection{Domain Discretization}
+    \subsubsection{Domain Discretization}
         Define nodes, points, and elements. 
 
-        \subsubsection{Shape Function Decomposition}
+        \paragraph{Shape Function Decomposition}
         Define a set of functions \(N\) that are a basis for the weight functions. In the case of the \textbf{Galerkin Form}, the basis/shape functions \(N\) are the same for the weight function and the solution function. We can decompose some constant \(\phi\) into
 
         \begin{equation}
@@ -210,7 +211,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
 
         Since we are working in Galerkin, \(N_A(\x) = N_B(\x) \) for \(A=B\) (ie, at the same node). 
 
-        \subsubsection{Discretize UCNS}
+        \paragraph{Discretize UCNS}
             Let's substitute the expressions in \cref{eq:variableshapefuncdecomp} into the weak UCNS form in \cref{eq:weakUCNS_IBP}.
 
             \begin{multline}
@@ -222,7 +223,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
 
             Note that \(\U_{,i} = [\sumA{n_n} \NAx \U_A]_{,i}\) , but since \(\U_A\) is not a function of \(\x\) (it is only dependent on \(A\)), the sum and \(\U_A\) can be taken out of the brackets, leaving \(\NAx\) to be derived: \(\U_{,i} = \sumA{n_n} \NAix \U_A\).
 
-            Since \(\W_B\) is a vector of constants, we can take it out of the integral, along with it's respective summation:
+            Since \(\W_B\) is a vector of constants, we can take it out of the integral, along with its respective summation:
             \begin{multline} \label{eq:shapefuncUCNS}
                 \sumB{n_n} \W_B  \Biggl\{\int_\Omega \biggl\{  \NBx  \cdot \sumA{n_n} \NAx \U_{A,t} 
                 -  \NBix  \F_i \biggl(\sumA{n_n} \NAx \U_A,\ \sumA{n_n} \NAix \U_A\biggr) \\
@@ -236,7 +237,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
 
             If we assume that \(\W_B\) is arbitrary, then \(\G_B=0\).
 
-        \subsubsection{Local/Element level Formulation}
+        \paragraph{Local/Element level Formulation}
             For brevity, we will abbreviate the inputs of \(\F_i\) and \(\src\) to their continuous inputs: \(\F_i(\U, \U_i)\) and \(\src(\U)\).
 
             \begin{multline} 
@@ -250,7 +251,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
                 \1 \(^e\) is the element ID number (\(e = \{1 ... n_n\}\)), 
                 \1 \(_a\) is the node ID number relative to the current element, \(a = \{1 ... n_{en}\}\)
                 \1 \(\U = \suma{n_{en}} \Neax \U_a^e\) , \(\U_i = \suma{n_{en}} \Neaix \U_a^e\)
-                \1 \(\Gamma^e \subset \Gamma \). In words, \(\Gamma^e\) is not the boundary of \(\Omega^e\)
+                \1 \(\Gamma^e \subset \Gamma \). In words, \(\Gamma^e\) is a subset (small part) of the global \(\Gamma\) (ie. is not the boundary of \(\Omega^e\))
                 
             \end{outline}
 
