@@ -1,0 +1,252 @@
+\documentclass{ucb}
+
+\begin{document}
+
+\ucbcourse{\textbf{ASEN 5331} CFD: Unstructured Grid}
+\ucbtitle{Homework 2}
+% \ucbgroup{X}
+\ucbdate{01}{10}{2019}
+\ucbauthors{
+    Pol Mesalles Ripoll \\
+}
+\ucblocation{Boulder, Colorado}
+\ucbcover
+
+\section*{Questions}
+
+\begin{enumerate}
+
+\item \textit{Express the diffusive flux in terms of the primitive variables $\bm{Y} = \begin{Bmatrix}p & \bm{u} & T\end{Bmatrix}^T$ and the gradient of the primitive variables.}
+\label{item1}
+
+Let's start by presenting the expression for the diffusive flux in the $i$-th direction:
+\begin{equation}
+    \bm{F}_i^\mathrm{diff} = 
+    \begin{Bmatrix}
+        F_{i1} \\
+        F_{i(m+1)} \\
+        F_{i5}
+    \end{Bmatrix}
+    =
+    -
+    \begin{Bmatrix}
+        0 \\
+        \tau_{im} \\
+        u_n\tau_{in}
+    \end{Bmatrix}
+    +
+    \begin{Bmatrix}
+        0 \\
+        0_m \\
+        q_i
+    \end{Bmatrix}
+    \label{eq:diff}
+\end{equation}
+where $i = 1 \ldots 3$ counts the flux directions and $m = 1 \ldots 3$ counts each component of the three momentum equations.
+
+Our vector of primitive variables is:
+\begin{equation}
+    \bm{Y} =
+    \begin{Bmatrix}
+        Y_1 \\
+        Y_{k+1} \\
+        Y_5
+    \end{Bmatrix}
+    =
+    \begin{Bmatrix}
+        p \\
+        u_k \\
+        T
+    \end{Bmatrix}
+\end{equation}
+where $k = 1 \ldots 3$ counts each component of the velocity vector.
+
+We will make use of the following constitutive relations:
+\begin{subequations}
+    \begin{gather}
+        \tau_{im} = \mu S_{im} = \mu\left(u_{i,m} + u_{m,i}\right) + \lambda u_{l,l}\delta_{im} \\
+        q_i = -\kappa T_{,i}
+    \end{gather}
+    \label{eq:const}
+\end{subequations}
+where the sign in Fourier'ls law has been deliberately omitted given the convention used in class.
+
+Putting it all together, we can write the diffusive flux in terms of the variables in $\bm{Y}$ as follows:
+\begin{equation}
+    \bm{F}_i^\mathrm{diff} = 
+    \begin{Bmatrix}
+        F_{i1} \\
+        F_{i(m+1)} \\
+        F_{i5}
+    \end{Bmatrix}
+    =
+    -
+    \begin{Bmatrix}
+        0 \\
+        \mu\left(Y_{i+1,m} + Y_{m+1,i}\right) + \lambda Y_{l+1,l}\delta_{im} \\
+        Y_{n+1} \left[\mu\left(Y_{i+1,n} + Y_{n+1,i}\right) + \lambda Y_{l+1,l}\delta_{in}\right]
+    \end{Bmatrix}
+    +
+    \begin{Bmatrix}
+        0 \\
+        0_m \\
+        -\kappa Y_{5,i}
+    \end{Bmatrix}
+    \label{eq:diffY}
+\end{equation}
+
+\pagebreak
+
+\item \textit{Find the entries in the diffusive tangent matrix $\bm{K}_{ij}$, as described in class.}
+\label{item2}
+
+The diffusive tangent matrix is defined as the tensor $\bm{K}_{ij}$ such that:
+\begin{equation}
+    \bm{F}_i^\mathrm{diff} = -\bm{K}_{ij} \bm{Y}_{,j}
+\end{equation}
+
+By factoring out the primitive variables from \autoref{eq:diffY}, one can write:
+\begin{equation}
+    \underbrace{
+        \begin{Bmatrix}
+            F_{i1} \\
+            F_{i(m+1)} \\
+            F_{i5}
+        \end{Bmatrix}
+    }_{\bm{F}_i^\mathrm{diff}}
+    =
+    -
+    \underbrace{
+        \begin{bmatrix}
+            0 & 0 & 0 \\
+            0 & K_{ij(m+1)(k+1)} & 0 \\
+            0 & K_{ij5(k+1)} & K_{ij55}
+        \end{bmatrix}
+    }_{\bm{K}_{ij}}
+    \underbrace{
+        \begin{Bmatrix}
+            Y_{1,j} \\
+            Y_{k+1,j} \\
+            Y_{5,j}
+        \end{Bmatrix}
+    }_{\bm{Y}_{,j}}
+    \label{eq:Kij}
+\end{equation}
+where:
+\begin{align}
+    &\begin{aligned}
+        K_{ij(m+1)(k+1)} &= \mu\left(\delta_{(i+1)(k+1)}\delta_{mj} + \delta_{(m+1)(k+1)}\delta_{ij}\right) + \lambda\,\delta_{(l+1)(k+1)}\delta_{lj}\delta_{im} \\
+        &= \mu\left(\delta_{ik}\delta_{mj} + \delta_{mk}\delta_{ij}\right) + \lambda\,\delta_{kj}\delta_{im}
+    \end{aligned}
+    \\
+    &\begin{aligned}
+        K_{ij5(k+1)} &= Y_{n+1}\left[\mu\left(\delta_{(i+1)(k+1)}\delta_{nj} + \delta_{(n+1)(k+1)}\delta_{ij}\right) + \lambda\,\delta_{(l+1)(k+1)}\delta_{lj}\delta_{in}\right] \\
+        &= Y_{n+1}\left[\mu\left(\delta_{ik}\delta_{nj} + \delta_{nk}\delta_{ij}\right) + \lambda\,\delta_{kj}\delta_{in}\right]
+    \end{aligned}
+    \\
+    &K_{ij55} = \kappa \, \delta_{ij}
+\end{align}
+and where the following free indices have been used:
+\begin{itemize}
+    \item $i = 1 \ldots 3$ counts each flux direction
+    \item $j = 1 \ldots 3$ counts each gradient direction
+    \item $m = 1 \ldots 3$ counts each row of the $\bm{K}_{ij}$ matrix (and each row of the $\bm{F}_i^\mathrm{diff}$ vector)
+    \item $k = 1 \ldots 3$ counts each column of the $\bm{K}_{ij}$ matrix (and each row of the $\bm{Y}_{,j}$ or $\bm{Y}$ vectors)
+\end{itemize}
+along with $l = 1 \ldots 3$ and $n = 1 \ldots 3$ that are used as "dummy" indices.
+
+\pagebreak
+
+\item \textit{Express the diffusive flux in terms of the conservation variables and the gradient of the conservation variables. Discuss the expected complexity of repeating step \ref{item2} for this variable choice. Do a couple of terms to make your point clear.}
+\label{item3}
+
+As a first step, recall the vector of conservation variables:
+\begin{equation}
+    \bm{U} =
+     \begin{Bmatrix}
+        U_1 \\
+        U_{k+1} \\
+        U_5
+    \end{Bmatrix}
+    =
+    \begin{Bmatrix}
+        \rho \\
+        \rho u_k \\
+        \rho e_\mathrm{tot}
+    \end{Bmatrix}
+\end{equation}
+
+In this case, besides the relations from \autoref{eq:const}, we will make use of:
+\begin{subequations}
+    \begin{gather}
+        e_\mathrm{tot} = e + \frac{1}{2}u_pu_p \\
+        e = c_v T
+    \end{gather}
+\end{subequations}
+
+Then, the resulting expression for the diffusive flux in terms of the variables in $\bm{U}$ is the following:
+\begin{equation}
+    \begin{aligned}
+        \bm{F}_i^\mathrm{diff} &= 
+        \begin{Bmatrix}
+            F_{i1} \\
+            F_{i(m+1)} \\
+            F_{i5}
+        \end{Bmatrix}
+        = \\
+        &-
+        \begin{Bmatrix}
+            0 \\
+            \mu\left[\left(\frac{U_{i+1,m}}{U_1} - \frac{U_{i+1}U_{1,m}}{U_1^2}\right) + \left(\frac{U_{m+1,i}}{U_1} - \frac{U_{m+1}U_{1,i}}{U_1^2}\right)\right] + \lambda\left(\frac{U_{l+1,l}}{U_1} - \frac{U_{l+1}U_{1,l}}{U_1^2}\right)\delta_{im} \\
+            \frac{U_{n+1}}{U_1} \left(\mu\left[\left(\frac{U_{i+1,n}}{U_1} - \frac{U_{i+1}U_{1,n}}{U_1^2}\right) + \left(\frac{U_{n+1,i}}{U_1} - \frac{U_{n+1}U_{1,i}}{U_1^2}\right)\right] + \lambda\left(\frac{U_{l+1,l}}{U_1} - \frac{U_{l+1}U_{1,l}}{U_1^2}\right)\delta_{in}\right)
+        \end{Bmatrix} \\
+        &-
+        \begin{Bmatrix}
+            0 \\
+            0_m \\
+            \frac{\kappa}{c_v}\left[\left(\frac{U_{5,i}}{U_1} - \frac{U_5U_{1,i}}{U_1^2}\right) - \left(\frac{U_{p+1,i}U_{p+1}}{U_1^2} - \frac{U_{p+1}U_{p+1}U_{1,i}}{U_1^3}\right)\right]
+        \end{Bmatrix}
+    \end{aligned}
+    \label{eq:diffU}
+\end{equation}
+
+As can be seen from the resulting expression \eqref{eq:diffU}, with this choice of $\bm{U}$ (conservation) variables, the diffusive tangent matrix $\bm{K}_{ij}$ will not factor out easily.
+
+Next, write the new system of equations equivalent to \autoref{eq:Kij}:
+\begin{equation}
+    \underbrace{
+        \begin{Bmatrix}
+            F_{i1} \\
+            F_{i(m+1)} \\
+            F_{i5}
+        \end{Bmatrix}
+    }_{\bm{F}_i^\mathrm{diff}}
+    =
+    -
+    \underbrace{
+        \begin{bmatrix}
+            0 & 0 & 0 \\
+            K_{ij(m+1)1} & K_{ij(m+1)(k+1)} & 0 \\
+            K_{ij51} & K_{ij5(k+1)} & K_{ij55}
+        \end{bmatrix}
+    }_{\bm{K}_{ij}}
+    \underbrace{
+        \begin{Bmatrix}
+            U_{1,j} \\
+            U_{k+1,j} \\
+            U_{5,j}
+        \end{Bmatrix}
+    }_{\bm{U}_{,j}}
+\end{equation}
+where we can see there are already more non-zero terms than before. A couple of these are:
+\begin{equation}
+    \begin{aligned}
+        &K_{ij(m+1)1} = -\left(\frac{U_{i+1}}{U_1^2}\,\delta_{mj} + \frac{U_{m+1}}{U_1^2}\,\delta_{ij}\right) -\lambda\,\frac{U_{l+1}}{U_1^2}\,\delta_{lj}\delta_{im} \\
+        &K_{ij55} = \frac{\kappa}{c_v}\frac{1}{U_1}\,\delta_{ij}
+    \end{aligned}
+\end{equation}
+and one can see that the momentum terms will be quite long. The indices used here are the same from Question \ref{item2}, adding $p = 1 \ldots 3$ to the list of "dummy indices" (for the kinetic energy velocity components).
+
+\end{enumerate}
+
+\end{document}
