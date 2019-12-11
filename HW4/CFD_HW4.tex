@@ -1,0 +1,80 @@
+
+\documentclass[12pt, letterpaper, twoside]{article}
+\usepackage[margin=2.50cm]{geometry} % Makes the Margins not stupid
+\usepackage{bm} % for making bold equation variables
+\usepackage{graphicx} % for placing images
+\usepackage{float} % for making figure stay in place
+\usepackage{amssymb} % for \lessapprox symbol
+\usepackage{amsmath} % because using math and \text command in math mode
+\usepackage[numbers]{natbib}
+\usepackage{cancel} % for doing a diagonal slash cancel
+\usepackage[mathscr]{euscript} % for Fancy curly F
+\usepackage{commath} % for \od, \pd
+\usepackage{url} % for \path{}
+
+\title{ASEN 5331 - HW4}
+\author{James Wright}
+% \date{2019-01-21}
+
+%------------ MACROS ----------------
+\newcommand{\etot}{e_{tot}}
+\renewcommand{\vec}[1]{\bm{#1}}
+\newcommand{\ttt}[1]{\texttt{#1}}
+\newcommand{\U}{\vec{U}}
+\newcommand{\A}{\vec{A}}
+\newcommand{\Y}{\vec{Y}}
+\newcommand{\F}{\vec{F}}
+\newcommand{\G}{\vec{G}}
+\newcommand{\Sm}{\vec{S}}
+\newcommand{\0}{\vec{0}}
+\newcommand{\src}{\vec{\mathscr{F}}}
+
+\begin{document}
+\maketitle
+\subsection{Meaning of \ttt{n...}}
+
+\begin{tabular} { |c|l|c|}
+    \hline
+    Term & Definition & Source/Relevant Reference \\
+    \hline
+    \ttt{nsd} & number of spacial dimensions & \path{common/common.h#343} \\
+    \ttt{nflow} & number of flow variables (ie. size of \(\Y\)) & ? \\
+    \ttt{nshape} & number of interior element shape functions & \path{common/common.h#444} \\
+    \ttt{ngauss} & number of interior element integration points & \path{common/common.h#447} \\
+    \ttt{npro} & number of elements processed in a single call of \ttt{e3.f} & Jansen lecture \\
+    \ttt{npro} & number of virtual processors for the current block & \path{common/common/h#586} \\
+    \ttt{nen} & maximum number of element nodes & \path{common/common.h#341} \\
+    \ttt{nQpt} & number of quadrature points per element & \path{common/shp4t.f#14} \\
+    \ttt{nshl} & number of shape functions per element & \path{common/genblkPosix.f#70} \\
+    \ttt{nshg} & global number of shape functions & \path{common/common.h#354} \\
+    \ttt{nenl} & number of element nodes for current block & \path{common/common.h#382} \\
+    \ttt{nedof} & total number of degrees of freedom & \path{common/e3.f#35,344} \\
+
+    \hline
+
+\end{tabular}
+
+\section{Essential Boundary Conditions}
+
+\subsection{Setting BC Values}
+In \path{compressible/itrbc.f} \\
+\(\Y\) = \ttt{y} \\
+\(g(x)\) = \ttt{BC} on a per node basis \\
+
+The essential boundary conditions are set in \path{/compressible/itrbc.f#59-198}. The \ttt{iBC} variable contains bit-wise information on what specific boundary conditions are going to be set. \ttt{BC} contains the BC data (\(g(x)\) in the notes) for each individual node. 
+\ttt{iBC} is set in \path{common/genibc.f} and \ttt{BC} is set in \path{common/genbc.f}, which takes \ttt{iBC} as an input. 
+
+Essentially, the code checks \ttt{iBC} for which values of \(\Y\) should be set. This logical check is done via the \ttt{ibits()} function. If a given \(\Y\) chosen, then \(\Y\) is set to the corresponding value in \ttt{BC}.
+
+So \path{common/gendat.f->gendat()} calls \path{common/genibc.f->geniBC()} to create the \ttt{iBC} vector. \path{common/gendat.f} then calls \path{common/genbc.f->genBC()} to create the \ttt{BC} vector which contains the values that should then be substituted into the \ttt{y} array in \path{compressible/itrbc.f}.
+
+
+\subsection{Applying \(\vec{S}\) Matrices}
+The application of the \(\Sm\) matrices applied in two different locations: \path{compressible/b3res.f} and \path{compressible/b3lhs.f}, which apply \(\Sm\) to the residual (\ttt{res}, RHS) and mass matrix (\ttt{EGMass}, LHS) respectively. 
+
+For the residual, the values of \ttt{res} are replaced based on the logical output from the same \ttt{ibits()} operation on \ttt{iBC} as before, similar to when \ttt{BC} values were set in \path{common/genbc.f->genBC()}. This process occurs in \path{compressible/b3res.f#28-163}. 
+
+Applying \(\Sm\) on the LHS operates in a nearly identical way. 
+
+
+\end{document}
