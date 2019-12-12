@@ -76,5 +76,32 @@ For the residual, the values of \ttt{res} are replaced based on the logical outp
 
 Applying \(\Sm\) on the LHS operates in a nearly identical way. 
 
+\section{Natural Boundary Conditions}
+
+There are 6 different flux components: normal flux \(h^m\), pressure flux \(h^p\), viscous stress/traction vector \(h^v_j\), and heat flux \(h^h\).
+
+\ttt{iBCB} is the equivalent of \ttt{IBC} for natural boundary conditions; it stores, bit-wise, which fluxes are to be set. \\
+\ttt{BCB} stores the \(h^j\) values. The last index of the array represents the 6 flux components:
+
+\begin{tabular} { |c|l|c|}
+    \hline
+    Index & Variable & Description \\
+    \hline
+    1 & \(h^m\) & mass/normal flux \\
+    2 & \(h^p\) & pressure flux \\
+    3 & \(h^v_1\) & viscous flux in x1 direction\\
+    4 & \(h^v_2\) & viscous flux in x2 direction\\
+    5 & \(h^v_3\) & viscous flux in x3 direction\\
+    6 & \(h^h\) & heat flux \\
+    \hline
+
+\end{tabular}
+
+\path{compressible/e3bvar.f#85-128} first computes the flow variable values at the quadrature points, \ttt{pres, T, u1, u2, u3, rho, ei, rk}. These values are used to set the ``floating'' fluxes (ie. fluxes on \(\Gamma-\Gamma_h^j\)). This also computes the user defined flux values \(h^j\) at quadrature points and puts them into \ttt{rou, p, Fv1, Fv2, Fv3, heat} for the components of \ttt{BCB}. 
+
+\path{compressible/e3b.f} sets a series of flux vectors \ttt{F1, F2, F3, F4, F5} which correspond to the 5 fluxes of the primitive equation (density flux, 3 velocity fluxes, and a temperature flux). These fluxes are either set to their ``floating'' values or the user specified flux values, as determined by the value of \ttt{iBCB}. The \ttt{e3b()} routine also defines \ttt{Fv2, Fv3, Fv4} and \ttt{Fv5} as parts of the viscous flux, which are then used for creating other fluxes (for example, part of the energy flux is simply \(u_i \tau_{ij}\)). 
+
+Once the \ttt{F1, F2, F3, F4, F5} variables are set, they are then put into the residual \ttt{rl} in \path{compressible/e3b.f#266-292}.
+
 
 \end{document}
