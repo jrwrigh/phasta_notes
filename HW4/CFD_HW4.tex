@@ -25,6 +25,7 @@
 \newcommand{\Y}{\vec{Y}}
 \newcommand{\F}{\vec{F}}
 \newcommand{\G}{\vec{G}}
+\newcommand{\M}{\vec{M}}
 \newcommand{\Sm}{\vec{S}}
 \newcommand{\0}{\vec{0}}
 \newcommand{\src}{\vec{\mathscr{F}}}
@@ -74,7 +75,7 @@ The application of the \(\Sm\) matrices applied in two different locations: \pat
 
 For the residual, the values of \ttt{res} are replaced based on the logical output from the same \ttt{ibits()} operation on \ttt{iBC} as before, similar to when \ttt{BC} values were set in \path{common/genbc.f->genBC()}. This process occurs in \path{compressible/b3res.f#28-163}. 
 
-Applying \(\Sm\) on the LHS operates in a nearly identical way. 
+Applying \(\Sm\) on the LHS operates in a similar way, with the primary difference being the differences in how \(\Sm\) is applied analytically (ie. \(\Sm^T \G\) vs. \(\Sm^T \M \Sm\)). Since the \(\Sm^T \M \Sm\) operation acts on the applicable row and column of the \(\M\) matrix at once via \ttt{do} loops.
 
 \section{Natural Boundary Conditions}
 
