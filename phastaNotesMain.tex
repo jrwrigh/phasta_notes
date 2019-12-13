@@ -41,6 +41,7 @@
 \newcommand{\sumb}[1]{\sum_{b=1}^{#1}}
 \newcommand{\src}{\vec{\mathscr{F}}}
 \newcommand{\ttt}[1]{\texttt{#1}}
+\DeclareMathOperator*{\assem}{\mathbb{A}}
 
 \begin{document}
 \maketitle
@@ -259,6 +260,21 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
                 \1 \(\Gamma^e \subset \Gamma \). In words, \(\Gamma^e\) is a subset (small part) of the global \(\Gamma\) (ie. is not the boundary of \(\Omega^e\))
                 
             \end{outline}
+        \paragraph{Assembly (Local to Global)}
+        The values at the local level must be brought up to the global level, in a process called assembly. This will be denoted by an \(\assem\). For a 1-D problem with 3 elements (and 4 nodes), this takes the form of:
+
+        \begin{equation}
+            \G_B = \assem \G_b^e \Rightarrow
+            \begin{cases}
+                \G_1 = \G_1^1 \\
+                \G_2 = \G^1_2 + \G_1^2 \\
+                \G_3 = \G_2^2 + \G^3_1 \\
+                \G_4 = \G^3_2 \\
+            \end{cases}
+        \end{equation}
+
+        Each \(\G_a^3\) in the array represents a single \(N_a\) shape function.
+
 
 
 \section{Random Notes}
