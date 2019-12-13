@@ -243,7 +243,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
 
             If we assume that \(\W_B\) is arbitrary, then \(\G_B=0\).
 
-        \paragraph{Local/Element level Formulation}
+    \subsection{Local/Element level Formulation}
             For brevity, we will abbreviate the inputs of \(\F_i\) and \(\src\) to their continuous inputs: \(\F_i(\U, \U_i)\) and \(\src(\U)\).
 
             \begin{multline} 
@@ -260,6 +260,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
                 \1 \(\Gamma^e \subset \Gamma \). In words, \(\Gamma^e\) is a subset (small part) of the global \(\Gamma\) (ie. is not the boundary of \(\Omega^e\))
                 
             \end{outline}
+
         \paragraph{Assembly (Local to Global)}
         The values at the local level must be brought up to the global level, in a process called assembly. This will be denoted by an \(\assem\). For a 1-D problem with 3 elements (and 4 nodes), this takes the form of:
 
@@ -273,7 +274,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
             \end{cases}
         \end{equation}
 
-        Each \(\G_a^3\) in the array represents a single \(N_a\) shape function.
+        Each \(\G_a^e\) in the array represents a single \(N_a\) shape function.
 
 
 
