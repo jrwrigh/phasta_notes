@@ -58,16 +58,15 @@
 \section{Essential Boundary Conditions}
 
 \subsection{Setting BC Values}
-In \path{compressible/itrbc.f} \\
-\(\Y\) = \ttt{y} \\
-\(g(x)\) = \ttt{BC} on a per node basis \\
 
-The essential boundary conditions are set in \path{/compressible/itrbc.f#59-198}. The \ttt{iBC} variable contains bit-wise information on what specific boundary conditions are going to be set. \ttt{BC} contains the BC data (\(g(x)\) in the notes) for each individual node. 
+The essential boundary conditions are set in \path{/compressible/itrbc.f#59-198}. The \ttt{iBC(nshg)} variable contains bit-wise information on what specific boundary conditions are going to be set. \ttt{BC(nshg, ndofBC)} contains the BC data (\(g(x)\) in the notes) for each individual node. \ttt{BC} is the equivalent of \(\hat{\vec{q}}\), where the index of \(\hat{\vec{q}}\) is stored in \ttt{ndofBC}. 
 \ttt{iBC} is set in \path{common/genibc.f} and \ttt{BC} is set in \path{common/genbc.f}, which takes \ttt{iBC} as an input. 
 
 Essentially, the code checks \ttt{iBC} for which values of \(\Y\) should be set. This logical check is done via the \ttt{ibits()} function. If a given \(\Y\) chosen, then \(\Y\) is set to the corresponding value in \ttt{BC}.
 
 So \path{common/gendat.f->gendat()} calls \path{common/genibc.f->geniBC()} to create the \ttt{iBC} vector. \path{common/gendat.f} then calls \path{common/genbc.f->genBC()} to create the \ttt{BC} vector which contains the values that should then be substituted into the \ttt{y} array in \path{compressible/itrbc.f}.
+
+\path{proces()} initially calls \path{gendat()}, which then calls \path{itrdrv()->itrbc()}. Note that \ttt{iBC} and \ttt{BC} are a global arrays (length \ttt{nshg}). They are simply used once at the beginning of the solver to set the \(g(x)\) values to \(\Y\) and to set the adjusted weight functions (using the \(\Sm\) matrices, discussed below). This way, the essential BC's don't have to be read and used every time step.
 
 
 \subsection{Applying \(\vec{S}\) Matrices}
@@ -81,7 +80,7 @@ Applying \(\Sm\) on the LHS operates in a similar way, with the primary differen
 
 There are 6 different flux components: normal flux \(h^m\), pressure flux \(h^p\), viscous stress/traction vector \(h^v_j\), and heat flux \(h^h\).
 
-\ttt{iBCB} is the equivalent of \ttt{IBC} for natural boundary conditions; it stores, bit-wise, which fluxes are to be set. \\
+\ttt{iBCB} is the equivalent of \ttt{iBC} for natural boundary conditions; it stores, bit-wise, which fluxes are to be set. \\
 \ttt{BCB} stores the \(h^j\) values. The last index of the array represents the 6 flux components:
 
 \begin{tabular} { |c|l|c|}
@@ -98,11 +97,12 @@ There are 6 different flux components: normal flux \(h^m\), pressure flux \(h^p\
 
 \end{tabular}
 
-\path{compressible/e3bvar.f#85-128} first computes the flow variable values at the quadrature points, \ttt{pres, T, u1, u2, u3, rho, ei, rk}. These values are used to set the ``floating'' fluxes (ie. fluxes on \(\Gamma-\Gamma_h^j\)). This also computes the user defined flux values \(h^j\) at quadrature points and puts them into \ttt{rou, p, Fv1, Fv2, Fv3, heat} for the components of \ttt{BCB}. 
+\path{compressible/e3bvar.f#85-128} first computes the flow variable values at the quadrature points, \ttt{pres, T, u1, u2, u3, rho, ei, rk}. These values are used to set the ``floating'' fluxes (ie. fluxes on \(\Gamma-\Gamma_h^j\)). This also computes the user-defined flux values \(h^j\) at quadrature points and puts them into \ttt{rou, p, Fv1, Fv2, Fv3, heat} for the components of \ttt{BCB}. 
 
 \path{compressible/e3b.f} sets a series of flux vectors \ttt{F1, F2, F3, F4, F5} which correspond to the 5 fluxes of the primitive equation (density flux, 3 velocity fluxes, and a temperature flux). These fluxes are either set to their ``floating'' values or the user specified flux values, as determined by the value of \ttt{iBCB}. The \ttt{e3b()} routine also defines \ttt{Fv2, Fv3, Fv4} and \ttt{Fv5} as parts of the viscous flux, which are then used for creating other fluxes (for example, part of the energy flux is simply \(u_i \tau_{ij}\)). 
 
 Once the \ttt{F1, F2, F3, F4, F5} variables are set, they are then put into the residual \ttt{rl} in \path{compressible/e3b.f#266-292}.
+
 
 
 \end{document}
