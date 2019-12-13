@@ -186,7 +186,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
         \int_\Omega \W \cdot (\U_{,t} + \F_{i,i} - \src) \dif \Omega= 0
     \end{equation}
 
-    Next, perform integration by parts and Gauss's theorem on \(\F_{i,i}\):
+    Next, perform integration by parts (IBP) and Gauss's theorem on \(\F_{i,i}\):
     \begin{equation} \label{eq:weakUCNS_IBP}
         \int_\Omega \left\{\W \cdot \U_{,t} - \W_{,i} \cdot \F_i(\U, \U_{,i}) - \W \cdot \src(\U) \right\} \dif \Omega 
         + \int_\Gamma \W \cdot \F_i(\U, \U_{,i}) \cdot \hat n_i \dif\Gamma= 0
