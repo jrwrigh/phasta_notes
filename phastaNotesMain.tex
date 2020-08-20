@@ -41,7 +41,22 @@
 \newcommand{\sumb}[1]{\sum_{b=1}^{#1}}
 \newcommand{\src}{\vec{\mathscr{F}}}
 \newcommand{\ttt}[1]{\texttt{#1}}
-\DeclareMathOperator*{\assem}{\mathbb{A}}
+
+
+%% Making large assembly operator
+% Stolen from https://tex.stackexchange.com/a/23436/122509
+\makeatletter
+\DeclareRobustCommand\bigop[1]{%
+  \mathop{\vphantom{\sum}\mathpalette\bigop@{#1}}\slimits@
+}
+\newcommand{\bigop@}[2]{%
+  \vcenter{%
+    \sbox\z@{$#1\sum$}%
+    \hbox{\resizebox{\ifx#1\displaystyle.9\fi\dimexpr\ht\z@+\dp\z@}{!}{$\m@th#2$}}%
+  }%
+}
+\makeatother
+\newcommand{\assem}{\DOTSB\bigop{\mathsf{A}}}
 
 \begin{document}
 \maketitle
@@ -265,7 +280,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
         The values at the local level must be brought up to the global level, in a process called assembly. This will be denoted by an \(\assem\). For a 1-D problem with 3 elements (and 4 nodes), this takes the form of:
 
         \begin{equation}
-            \G_B = \assem \G_b^e \Rightarrow
+            \G_B = \assem^{n_{el}}_{e=1} \G_b^e \Rightarrow
             \begin{cases}
                 \G_1 = \G_1^1 \\
                 \G_2 = \G^1_2 + \G_1^2 \\
