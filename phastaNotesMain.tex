@@ -12,6 +12,7 @@
 \usepackage{commath} % for \od, \pd
 \usepackage{outlines} % for outlines env
 \usepackage{url} % for \path
+\usepackage{relsize} % for assembly operator
 
 \title{Notes on the Fundamental Equations of PHASTA}
 \author{James Wright}
@@ -43,21 +44,9 @@
 \newcommand{\src}{\vec{\mathscr{F}}}
 \newcommand{\ttt}[1]{\texttt{#1}}
 
-
-%% Making large assembly operator
-% Stolen from https://tex.stackexchange.com/a/23436/122509
-\makeatletter
-\DeclareRobustCommand\bigop[1]{%
-  \mathop{\vphantom{\sum}\mathpalette\bigop@{#1}}\slimits@
+\DeclareMathOperator*{\assem}{
+    \mathlarger{\mathlarger{\mathlarger{\boldsymbol{\mathsf{A}}}}}
 }
-\newcommand{\bigop@}[2]{%
-  \vcenter{%
-    \sbox\z@{$#1\sum$}%
-    \hbox{\resizebox{\ifx#1\displaystyle.9\fi\dimexpr\ht\z@+\dp\z@}{!}{$\m@th#2$}}%
-  }%
-}
-\makeatother
-\newcommand{\assem}{\DOTSB\bigop{\mathsf{A}}}
 
 \begin{document}
 \maketitle
