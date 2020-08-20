@@ -20,6 +20,7 @@
 %------------ MACROS ----------------
 \newcommand{\etot}{e_{tot}}
 \renewcommand{\vec}[1]{\bm{#1}}
+\newcommand{\vecvec}[1]{\widetilde{\bm{#1}}}
 \newcommand{\A}{\vec{A}}
 \newcommand{\U}{\vec{U}}
 \newcommand{\G}{\vec{G}}
@@ -244,7 +245,7 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
 
             Note that \(\U_{,i} = [\sumA{n_n} \NAx \U_A]_{,i}\) , but since \(\U_A\) is not a function of \(\x\) (it is only dependent on \(A\)), the sum and \(\U_A\) can be taken out of the brackets, leaving \(\NAx\) to be derived: \(\U_{,i} = \sumA{n_n} \NAix \U_A\).
 
-            Since \(\W_B\) is a vector of constants, we can take it out of the integral, along with its respective summation:
+            Since \(\W_B\) is not a function of space (\(\x\)), we can take it out of the integral, along with its respective summation:
             \begin{multline} \label{eq:shapefuncUCNS}
                 \sumB{n_n} \W_B  \Biggl\{\int_\Omega \biggl\{  \NBx  \cdot \sumA{n_n} \NAx \U_{A,t} 
                 -  \NBix  \F_i \biggl(\sumA{n_n} \NAx \U_A,\ \sumA{n_n} \NAix \U_A\biggr) \\
@@ -252,11 +253,16 @@ Unsteady Compressible Navier-Stokes (UCNS) equations:
                 + \int_\Gamma \F_i\biggl(\sumA{n_n} \NAx \U_A,\ \sumA{n_n} \NAix \U_A\biggr) \hat n_i \dif \Gamma \Biggr\} = 0
             \end{multline}
 
-            \begin{equation}
+            \begin{equation} \label{eq:weightdotresidual}
                 \cref{eq:shapefuncUCNS} \Rightarrow \sumB{n_n} \W_B \cdot \G_B = 0
             \end{equation}
 
-            If we assume that \(\W_B\) is arbitrary, then \(\G_B=0\).
+            If we assume that \(\W_B\) is arbitrary, then \cref{eq:weightdotresidual} is true only if \(\G_B=\bf{0}\). Thus, \(\G_B\) can be treated as \(5 \times n_n\) non-linear ODEs.
+
+            \begin{equation*}
+                \G_B = \G_B(\vecvec{U}, \vecvec{U}_{,t}), \quad \vecvec{U} = \{\U_A\}
+            \end{equation*}
+
 
     \subsection{Local/Element level Formulation}
             For brevity, we will abbreviate the inputs of \(\F_i\) and \(\src\) to their continuous inputs: \(\F_i(\U, \U_i)\) and \(\src(\U)\).
